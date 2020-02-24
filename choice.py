@@ -1,12 +1,24 @@
 import sys
+import os
 from Pass import *
 from SQL import *
 from DoS import *
 from main import *
 import socket
-import threading
 from datetime import datetime
 from PyQt5.QtWidgets import QMainWindow, QApplication
+import pymysql.cursors
+
+conexao = pymysql.connect(
+    host='127.0.0.1',
+    user='root',
+    password='',
+    db='sitedjango',
+    charset='utf8mb4',
+    cursorclass=pymysql.cursors.DictCursor
+)
+
+cursor = conexao.cursor()
 
 
 class Choice(QMainWindow, Ui_MainWindow):
@@ -38,9 +50,6 @@ class ChoicePass(QMainWindow, Ui_Pass_Window):
         self.btnVoltarPass.clicked.connect(self.voltar)
         self.btnChoicePass.clicked.connect(self.escolhapass)
         self.passBork = None
-        self.conn = None
-        self.data = None
-        self.aa = None
 
         self.dateNow = datetime.now()
         self.dateNow = self.dateNow.strftime('%Y-%m-%d_%H-%M-%S')
@@ -64,10 +73,10 @@ class ChoicePass(QMainWindow, Ui_Pass_Window):
             self.l_defesa_pass.setText(f'A defesa escolhida foi {self.l_pass2.text()}')
             self.passBork = server()
             if self.passBork == '1':
-                file = open(f'Password_{self.l_pass1.text()}_{self.dateNow}.txt', 'w+')
+                file = open(f'Password_{self.l_pass2.text()}_{self.dateNow}.txt', 'w+')
                 file.write('Defesa contra quebra de senhas funcionou e senha foi protegida contra ataque!\n')
             else:
-                file = open(f'Password_{self.l_pass1.text()}__{self.dateNow}.txt', 'w+')
+                file = open(f'Password_{self.l_pass2.text()}__{self.dateNow}.txt', 'w+')
                 file.write('Senha foi quebrada!\n')
                 file.write(f'{self.passBork}\n')
 
@@ -136,15 +145,58 @@ class ChoiceSql(QMainWindow, Ui_Sql_MainWindow):
         self.btnSQLVoltar.clicked.connect(self.voltar)
         self.btnChoiceSQL.clicked.connect(self.escolhasql)
 
+        self.dateNow = datetime.now()
+        self.dateNow = self.dateNow.strftime('%Y-%m-%d_%H-%M-%S')
+        self.sqlBork = None
+        self.resultado1 = None
+        self.resultado2 = None
+
     def voltar(self):
         choice.show()
         sqlChoice.close()
 
     def escolhasql(self):
+        cursor.execute('SELECT * FROM contatos_categoria')
+        self.resultado1 = cursor.fetchall()
+        self.resultado1 = len(self.resultado1)
         if int(self.inputSQL.text()) == 1:
+            os.rename('C:/agenda/contatos/views.py', 'C:/agenda/contatos/viewsOriginal.py')
+            os.rename('C:/agenda/contatos/viewsORM.py', 'C:/agenda/contatos/views.py')
             self.l_defesa_sql.setText(f'A defesa escolhida foi {self.l_sql1.text()}')
+            #self.sqlBork = server()
+            cursor.execute('SELECT * FROM contatos_categoria')
+            self.resultado2 = cursor.fetchall()
+            self.resultado2 = len(self.resultado2)
+            if self.resultado1 == self.resultado2:
+                file = open(f'SQL_{self.l_sql1.text()}_{self.dateNow}.txt', 'w+')
+                file.write('Defesa contra SQL Injection funcionou e o banco foi protegido contra ataque!\n')
+                os.rename('C:/agenda/contatos/views.py', 'C:/agenda/contatos/viewsORM.py')
+                os.rename('C:/agenda/contatos/viewsOriginal.py', 'C:/agenda/contatos/views.py')
+            else:
+                file = open(f'SQL_{self.l_sql1.text()}__{self.dateNow}.txt', 'w+')
+                file.write('SQL Injection aplicado!\n')
+                file.write(f'{self.sqlBork}\n')
+                os.rename('C:/agenda/contatos/views.py', 'C:/agenda/contatos/viewsORM.py')
+                os.rename('C:/agenda/contatos/viewsOriginal.py', 'C:/agenda/contatos/views.py')
         elif int(self.inputSQL.text()) == 2:
+            os.rename('C:/agenda/contatos/views.py', 'C:/agenda/contatos/viewsOriginal.py')
+            os.rename('C:/agenda/contatos/viewsORM.py', 'C:/agenda/contatos/views.py')
             self.l_defesa_sql.setText(f'A defesa escolhida foi {self.l_sql2.text()}')
+            #self.sqlBork = server()
+            cursor.execute('SELECT * FROM contatos_categoria')
+            self.resultado2 = cursor.fetchall()
+            self.resultado2 = len(self.resultado2)
+            if self.resultado1 == self.resultado2:
+                file = open(f'SQL_{self.l_sql2.text()}_{self.dateNow}.txt', 'w+')
+                file.write('Defesa contra SQL Injection funcionou e o banco foi protegido contra ataque!\n')
+                os.rename('C:/agenda/contatos/views.py', 'C:/agenda/contatos/viewsORM.py')
+                os.rename('C:/agenda/contatos/viewsOriginal.py', 'C:/agenda/contatos/views.py')
+            else:
+                file = open(f'SQL_{self.l_sql2.text()}__{self.dateNow}.txt', 'w+')
+                file.write('SQL Injection aplicado!\n')
+                file.write(f'{self.sqlBork}\n')
+                os.rename('C:/agenda/contatos/views.py', 'C:/agenda/contatos/viewsORM.py')
+                os.rename('C:/agenda/contatos/viewsOriginal.py', 'C:/agenda/contatos/views.py')
 
 
 def server(messagem):
